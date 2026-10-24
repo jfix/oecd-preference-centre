@@ -63,7 +63,9 @@ The same signup, embedded in any oecd.org page. Editors add it in AEM with two l
 
 ![Journey 4: unsubscribing](docs/journeys/journey-4-unsubscribe.png)
 
-Every newsletter footer links back to the preference centre. Unsubscribing stops just that one email, and also works through mail apps' built-in unsubscribe buttons (Gmail, Apple Mail, Outlook).
+Every newsletter footer links back to the preference centre. Unsubscribing stops just that one email.
+
+> **Assumption:** this journey assumes Adestra lets us put our own unsubscribe link in the newsletters. If Adestra's own link is used, or someone uses their mail app's unsubscribe button, the unsubscribe happens in Adestra and we don't hear about it. See [Open questions](#open-questions).
 
 ---
 
@@ -107,10 +109,37 @@ flowchart LR
 - **Confirmation and sign-in emails are sent by the preference centre**, not by Adestra.
 - **If Adestra is unavailable, nothing is lost:** changes wait in the outbox and are retried every 5 minutes.
 
+## Open questions
+
+### Unsubscribes and bounces that happen in Adestra
+
+The preference centre is meant to be the source of truth, but some changes will happen on Adestra's side and never reach us:
+
+- Adestra's own unsubscribe link, if a newsletter template uses it instead of ours.
+- The Unsubscribe button Gmail, Outlook and Apple Mail show at the top of an email. It uses a hidden email header that Adestra usually sets.
+- "Report spam" clicks (complaints) and hard bounces, which only Adestra sees.
+
+Left alone, our database would still say "subscribed" for these people.
+
+**Proposed approach (both, not either):**
+
+1. **Our links in the newsletters wherever Adestra allows it.** We already push a "manage subscriptions" link to each Adestra contact; add a per-newsletter unsubscribe link and use both in the templates. Most unsubscribes then come to us first.
+2. **Regularly fetch changes from Adestra.** A scheduled job asks Adestra's API every few minutes for new unsubscribes, bounces and complaints, and records them in our database (and consent log) with Adestra as the source.
+
+**Rule:** an unsubscribe recorded in Adestra always wins. Before pushing a subscribe to Adestra, check that Adestra hasn't recorded an unsubscribe we don't know about yet, so we never quietly re-add someone to a list they left.
+
+**To ask Adestra:**
+
+- Can templates use our own unsubscribe link instead of theirs, and can we set the `List-Unsubscribe` header that Gmail and Outlook use?
+- Is an unsubscribe in Adestra for one list, or for everything the person receives?
+- Which API call lists unsubscribes, bounces and complaints since a given time? Or can Adestra notify us (webhook) when they happen?
+
+Not implemented in the prototype.
+
 ## What's needed to go live
 
 - **Build on Azure.** The prototype runs on Cloudflare; the code is written so the move is mostly swapping a few adapters (see below).
-- **Adestra setup.** One list per newsletter edition, a field for the "manage subscriptions" link, and a way to receive bounces and complaints. The Adestra connection exists but hasn't been tested against our account.
+- **Adestra setup.** One list per newsletter edition, a field for the "manage subscriptions" link, and answers to the [open questions](#open-questions) on unsubscribes and bounces. The Adestra connection exists but hasn't been tested against our account.
 - **An email sending domain** for confirmation emails (e.g. `newsletters.oecd.org`).
 - **Brand assets:** a PNG logo for emails, and sign-off on the design.
 - **AEM:** allow the signup box's script on oecd.org pages (Content Security Policy).
