@@ -9,7 +9,7 @@ export const page = (title: string, body: string, lang = 'en') => `<!doctype htm
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@700;800;900&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css"></head>
 <body>
-<header class="site-header"><div class="wrap"><a class="logo" href="/"><span class="logo-mark" aria-hidden="true"></span>OECD</a></div></header>
+<header class="site-header"><div class="wrap"><a class="logo" href="/"><img src="/oecd-logo.svg" alt="OECD" width="134" height="33"></a></div></header>
 <main class="wrap narrow">${body}</main>
 </body></html>`;
 

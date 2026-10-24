@@ -39,9 +39,8 @@ h3 { font-size: 19px; font-weight: 800; line-height: 1.25; }
 /* ---------- Header */
 .site-header { border-bottom: 1px solid var(--border); background: var(--white); position: sticky; top: 0; z-index: 30; }
 .site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
-.logo { display: inline-flex; align-items: center; gap: 8px; font: 900 26px/1 var(--font-display); color: var(--navy); text-decoration: none; letter-spacing: -0.03em; }
-.logo-mark { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); position: relative; }
-.logo-mark::after { content: ''; position: absolute; inset: 7px 5px 7px 12px; border-radius: 50%; border: 3px solid var(--white); border-left-color: transparent; }
+.logo { display: inline-flex; align-items: center; }
+.logo img { display: block; height: 30px; width: auto; }
 .header-actions { display: flex; align-items: center; gap: 12px; font-size: 14px; }
 .lang-switch { display: inline-flex; border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--navy); }
 .lang-switch button { border: 0; background: var(--white); color: var(--navy); font: 500 13px/1 var(--font-body); padding: 7px 10px; cursor: pointer; }
