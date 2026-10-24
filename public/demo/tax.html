@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tax (widget demo) | OECD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@700;800;900&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body { font-family: 'Noto Sans', sans-serif; }
+    .topic-hero { background: var(--navy); color: rgba(255,255,255,.8); padding: 48px 0; }
+    .topic-hero h1 { color: #fff; }
+    .topic-hero p { max-width: 60ch; font-size: 18px; margin: 12px 0 0; }
+    .layout { display: grid; gap: 40px; padding-top: 48px; padding-bottom: 80px; }
+    @media (min-width: 900px) { .layout { grid-template-columns: 1fr 380px; } }
+    .placeholder { background: var(--surface); border-radius: 14px; height: 140px; margin-bottom: 16px; }
+    .note { font-size: 13px; background: #fff7d6; border: 1px solid #e8d48a; color: #6b5a10; padding: 10px 14px; border-radius: 10px; margin-top: 24px; }
+    .note code { font-size: 12px; }
+  </style>
+  <script type="module" src="/widget.js"></script>
+</head>
+<body>
+  <header class="site-header"><div class="wrap"><a class="logo" href="/"><span class="logo-mark" aria-hidden="true"></span>OECD</a></div></header>
+  <section class="topic-hero">
+    <div class="wrap">
+      <h1>Tax</h1>
+      <p>The OECD helps countries build fair and effective tax systems, and tackle tax avoidance and evasion.</p>
+    </div>
+  </section>
+  <div class="wrap layout">
+    <div>
+      <h2>Latest insights</h2>
+      <p>Mock section page, standing in for an AEM topic page on oecd.org.</p>
+      <div class="placeholder"></div>
+      <div class="placeholder"></div>
+      <div class="placeholder"></div>
+    </div>
+    <aside>
+      <oecd-newsletter-signup topic="tax" lang="en"></oecd-newsletter-signup>
+      <div class="note">
+        Added to the page with:<br>
+        <code>&lt;script type="module" src="…/widget.js"&gt;&lt;/script&gt;</code><br>
+        <code>&lt;oecd-newsletter-signup topic="tax"&gt;</code>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
