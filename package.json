@@ -6,13 +6,15 @@
     "dev": "wrangler dev",
     "db:migrate": "wrangler d1 migrations apply prefs --local",
     "typecheck": "tsc --noEmit",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "journeys": "node scripts/capture-journeys.mjs && node scripts/build-journey-boards.mjs"
   },
   "dependencies": {
     "hono": "^4.13.13"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261024.1",
+    "puppeteer-core": "^24.43.1",
     "typescript": "^5.9.3",
     "wrangler": "^4.152.0"
   }
