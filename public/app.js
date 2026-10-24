@@ -1,67 +1,5 @@
 // Preference centre front end. No build step: plain ES modules served as static assets.
-
-const strings = {
-  en: {
-    crumbAbout: 'About', crumbHere: 'Newsletters', title: 'Newsletters and alerts',
-    lede: 'Join more than 500 000 policymakers. Get the latest OECD research, data and tools delivered straight to your inbox.',
-    langFilter: 'Language', search: 'Search', searchPlaceholder: 'Search newsletters and blogs',
-    all: 'All', newsletters: 'Newsletters', blogs: 'Blog alerts', mine: 'My subscriptions', allLanguages: 'All languages',
-    newsletter: 'Newsletter', blog: 'Blog alert',
-    signUp: 'Sign up', selected: 'Selected', subscribe: 'Subscribe', subscribed: 'Subscribed', unsubscribe: 'Unsubscribe',
-    featuredEyebrow: 'The OECD corporate newsletter',
-    featuredTitle: 'Our monthly digest',
-    featuredBody: 'Key data, insights and policy highlights from all our fields of work, in English, French and Spanish.',
-    manage: 'Manage subscriptions', signOut: 'Sign out', signedInAs: 'Signed in as',
-    signedInBanner: (e) => `You're signed in as <strong>${e}</strong>. Changes are saved straight away.`,
-    confirmedBanner: (n) => `Thank you, your subscription${n > 1 ? 's are' : ' is'} confirmed. You can change them any time on this page.`,
-    traySelected: (n) => `${n} selected`,
-    emailPlaceholder: 'Your email address', email: 'Email address',
-    privacy: 'We will email you to confirm. You can unsubscribe at any time. <a href="https://www.oecd.org/en/about/privacy.html" target="_blank">Privacy policy</a>',
-    checkInbox: (e) => `Almost done! We've sent an email to <strong>${e}</strong>. Click the link inside to confirm.`,
-    openMailbox: 'Open the prototype mailbox',
-    ok: 'OK', remove: 'Remove', cancel: 'Cancel', sendLink: 'Send me a link',
-    signinTitle: 'Manage your subscriptions',
-    signinIntro: "Enter your email address and we'll send you a link to see and change your subscriptions. No password needed.",
-    signinSent: (e) => `Check your inbox: we've sent a link to ${e}.`,
-    manageCtaTitle: 'Already subscribed?',
-    manageCtaBody: 'Get a link by email to see and change everything you receive from the OECD.',
-    toastOn: (n) => `Subscribed to ${n}`, toastOff: (n) => `Unsubscribed from ${n}`, undo: 'Undo',
-    emptyTitle: 'Nothing matches', emptyBody: 'Try another search or language.',
-    emptyMine: "You're not subscribed to anything yet. Browse the newsletters and blog alerts below.",
-    error: 'Something went wrong. Please try again.',
-    results: (n) => `${n}`,
-  },
-  fr: {
-    crumbAbout: 'À propos', crumbHere: "Lettres d'information", title: "Lettres d'information et alertes",
-    lede: "Rejoignez plus de 500 000 décideurs. Recevez les dernières recherches, données et outils de l'OCDE directement dans votre boîte mail.",
-    langFilter: 'Langue', search: 'Rechercher', searchPlaceholder: 'Rechercher une lettre ou un blog',
-    all: 'Tout', newsletters: "Lettres d'information", blogs: 'Alertes blog', mine: 'Mes abonnements', allLanguages: 'Toutes les langues',
-    newsletter: "Lettre d'information", blog: 'Alerte blog',
-    signUp: "S'abonner", selected: 'Sélectionné', subscribe: "S'abonner", subscribed: 'Abonné', unsubscribe: 'Se désabonner',
-    featuredEyebrow: "La lettre d'information de l'OCDE",
-    featuredTitle: 'Notre sélection mensuelle',
-    featuredBody: "Données, analyses et perspectives de tous nos domaines de travail, en anglais, français et espagnol.",
-    manage: 'Gérer mes abonnements', signOut: 'Se déconnecter', signedInAs: 'Connecté en tant que',
-    signedInBanner: (e) => `Vous êtes connecté en tant que <strong>${e}</strong>. Vos modifications sont enregistrées immédiatement.`,
-    confirmedBanner: () => 'Merci, votre abonnement est confirmé. Vous pouvez le modifier à tout moment sur cette page.',
-    traySelected: (n) => `${n} sélectionné${n > 1 ? 's' : ''}`,
-    emailPlaceholder: 'Votre adresse e-mail', email: 'Adresse e-mail',
-    privacy: 'Nous vous enverrons un e-mail de confirmation. Désabonnement possible à tout moment. <a href="https://www.oecd.org/fr/about/privacy.html" target="_blank">Politique de confidentialité</a>',
-    checkInbox: (e) => `Presque terminé ! Nous avons envoyé un e-mail à <strong>${e}</strong>. Cliquez sur le lien pour confirmer.`,
-    openMailbox: 'Ouvrir la boîte mail du prototype',
-    ok: 'OK', remove: 'Retirer', cancel: 'Annuler', sendLink: 'Envoyer le lien',
-    signinTitle: 'Gérer vos abonnements',
-    signinIntro: 'Saisissez votre adresse e-mail : nous vous enverrons un lien pour consulter et modifier vos abonnements. Aucun mot de passe nécessaire.',
-    signinSent: (e) => `Consultez votre boîte mail : nous avons envoyé un lien à ${e}.`,
-    manageCtaTitle: 'Déjà abonné ?',
-    manageCtaBody: "Recevez un lien par e-mail pour consulter et modifier tout ce que vous recevez de l'OCDE.",
-    toastOn: (n) => `Abonné à ${n}`, toastOff: (n) => `Désabonné de ${n}`, undo: 'Annuler',
-    emptyTitle: 'Aucun résultat', emptyBody: 'Essayez une autre recherche ou une autre langue.',
-    emptyMine: "Vous n'êtes abonné à rien pour l'instant. Parcourez les lettres et alertes ci-dessous.",
-    error: 'Une erreur est survenue. Veuillez réessayer.',
-    results: (n) => `${n}`,
-  },
-};
+// All text comes from i18n/<lang>.json and the catalogue from config/catalogue.json, both via /api/catalogue.
 
 const icons = {
   mail: '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
@@ -84,16 +22,26 @@ const state = {
   type: params.get('view') === 'mine' ? 'mine' : 'all',
   lang: 'all',
   q: '',
-  ui: params.get('lang') === 'fr' ? 'fr' : 'en',
+  ui: params.get('lang') ?? 'en', // checked against the available languages once the catalogue loads
   banner: params.get('confirmed') ? 'confirmed' : null,
   trayDone: null,
 };
 history.replaceState(null, '', location.pathname);
 
-const t = (k, ...a) => {
-  const v = strings[state.ui][k];
-  return typeof v === 'function' ? v(...a) : v;
-};
+/**
+ * Looks up text by path (e.g. 'themes.economy'), falling back to English. {placeholders} are filled from `vars`,
+ * HTML-escaped; the strings themselves are trusted and may contain markup. Objects with one/other are plurals keyed on vars.n.
+ */
+function tr(path, vars = {}) {
+  const find = (lang) => path.split('.').reduce((node, key) => node?.[key], state.cat.i18n[lang]);
+  let msg = find(state.ui) ?? find('en');
+  if (msg && typeof msg === 'object') msg = new Intl.PluralRules(state.ui).select(Number(vars.n ?? 0)) === 'one' ? msg.one : msg.other;
+  if (typeof msg !== 'string') return path;
+  const all = { ...vars };
+  if (msg.includes('{privacyUrl}') && !('privacyUrl' in all)) all.privacyUrl = tr('meta.privacyUrl');
+  return msg.replace(/\{(\w+)\}/g, (m, k) => (k in all ? esc(all[k]) : m));
+}
+const t = (key, vars) => tr(`ui.${key}`, vars);
 const signedIn = () => !!state.me.email;
 // Prototype only: emails aren't really sent, they land in the dev mailbox.
 const mailboxLink = (email) =>
@@ -118,7 +66,7 @@ function shownEdition(topic) {
 function visibleTopics() {
   const q = state.q.trim().toLowerCase();
   return state.cat.topics.filter((tp) => {
-    if (tp.id === 'corporate' && state.type !== 'mine' && !q && state.lang === 'all') return false; // shown as the feature
+    if (tp.theme === 'featured' && state.type !== 'mine' && !q && state.lang === 'all') return false; // shown as the feature
     if (state.type === 'newsletter' && tp.type !== 'newsletter') return false;
     if (state.type === 'blog' && tp.type !== 'blog') return false;
     if (state.type === 'mine' && !tp.editions.some((e) => isOn(e.id))) return false;
@@ -143,16 +91,16 @@ function toggleButton(ed, label) {
 function card(topic) {
   const ed = shownEdition(topic);
   const anyOn = topic.editions.some((e) => isOn(e.id));
-  const freq = state.cat.frequencies[topic.frequency][state.ui];
+  const freq = tr(`frequencies.${topic.frequency}`);
   const langs =
     topic.editions.length > 1
-      ? `<div class="editions" role="group" aria-label="${t('langFilter')}">${topic.editions
+      ? `<div class="editions" role="group" aria-label="${t('language')}">${topic.editions
           .map(
             (e) => `<button type="button" data-show="${topic.id}:${e.id}" data-focus="show-${e.id}" aria-pressed="${e.id === ed.id}"
-              class="${isOn(e.id) ? 'has-on' : ''}" title="${esc(state.cat.languageNames[e.lang])}" lang="${e.lang}">${e.lang}</button>`,
+              class="${isOn(e.id) ? 'has-on' : ''}" title="${esc(state.cat.languages[e.lang])}" lang="${e.lang}">${e.lang}</button>`,
           )
           .join('')}</div>`
-      : `<span class="editions"><span class="single">${state.cat.languageNames[ed.lang]}</span></span>`;
+      : `<span class="editions"><span class="single">${state.cat.languages[ed.lang]}</span></span>`;
   return `<article class="card ${anyOn ? 'is-on' : ''}" lang="${ed.lang}" ${ed.lang === 'ar' ? 'dir="auto"' : ''}>
     <div class="card-meta">
       <span class="type ${topic.type}">${topic.type === 'blog' ? icons.bell : icons.mail}${t(topic.type)}</span>
@@ -165,11 +113,11 @@ function card(topic) {
 }
 
 function feature() {
-  const topic = state.cat.topics.find((tp) => tp.id === 'corporate');
+  const topic = state.cat.topics.find((tp) => tp.theme === 'featured');
   const rows = topic.editions
     .map(
       (e) => `<div class="feature-edition ${isOn(e.id) ? 'is-on' : ''}" lang="${e.lang}">
-        <div><strong>${esc(e.name)}</strong><span>${state.cat.languageNames[e.lang]} · ${state.cat.frequencies[e.lang === 'es' ? 'quarterly' : 'monthly'][state.ui]}</span></div>
+        <div><strong>${esc(e.name)}</strong><span>${state.cat.languages[e.lang]} · ${tr(`frequencies.${e.frequency ?? topic.frequency}`)}</span></div>
         ${toggleButton(e)}
       </div>`,
     )
@@ -202,7 +150,7 @@ function renderChips() {
   const langs = [...new Set(state.cat.topics.flatMap((tp) => tp.editions.map((e) => e.lang)))];
   $('#lang-filter').innerHTML =
     `<option value="all">${t('allLanguages')}</option>` +
-    langs.map((l) => `<option value="${l}" ${state.lang === l ? 'selected' : ''}>${state.cat.languageNames[l]}</option>`).join('');
+    langs.map((l) => `<option value="${l}" ${state.lang === l ? 'selected' : ''}>${state.cat.languages[l]}</option>`).join('');
   $('#search').placeholder = t('searchPlaceholder');
 }
 
@@ -214,11 +162,11 @@ function renderCatalogue() {
   if (list.length === 0 && !showFeature) {
     html += `<div class="empty"><h2>${state.type === 'mine' ? t('mine') : t('emptyTitle')}</h2><p>${state.type === 'mine' ? t('emptyMine') : t('emptyBody')}</p></div>`;
   }
-  for (const [themeId, theme] of Object.entries(state.cat.themes)) {
+  for (const themeId of state.cat.themes) {
     const inTheme = list.filter((tp) => tp.theme === themeId);
     if (!inTheme.length) continue;
     html += `<section class="section" aria-labelledby="th-${themeId}">
-      <div class="section-head"><h2 id="th-${themeId}">${theme[state.ui]}</h2><span class="count">${inTheme.length}</span></div>
+      <div class="section-head"><h2 id="th-${themeId}">${tr(`themes.${themeId}`)}</h2><span class="count">${inTheme.length}</span></div>
       <div class="grid">${inTheme.map(card).join('')}</div>
     </section>`;
   }
@@ -231,18 +179,20 @@ function renderCatalogue() {
 
 function renderHeader() {
   document.documentElement.lang = state.ui;
-  document.title = `${t('title')} | ${state.ui === 'fr' ? 'OCDE' : 'OECD'}`;
+  document.title = `${t('title')} | ${tr('meta.orgName')}`;
   document.querySelectorAll('[data-i18n]').forEach((el) => (el.textContent = t(el.dataset.i18n)));
   document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => (el.placeholder = t(el.dataset.i18nPlaceholder)));
-  document.querySelectorAll('[data-ui-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.uiLang === state.ui)));
+  $('#ui-langs').innerHTML = state.cat.uiLanguages
+    .map((l) => `<button type="button" data-ui-lang="${l}" lang="${l}" aria-pressed="${l === state.ui}" title="${esc(state.cat.i18n[l].meta.languageName)}">${l.toUpperCase()}</button>`)
+    .join('');
   document.body.classList.toggle('signed-in', signedIn());
   $('#account').innerHTML = signedIn()
     ? `<span class="email" title="${esc(state.me.email)}">${esc(state.me.email)}</span><button type="button" class="link-btn" data-signout>${t('signOut')}</button>`
     : `<button type="button" class="link-btn" data-open-signin>${t('manage')}</button>`;
 
   let banner = '';
-  if (state.banner === 'confirmed') banner = `<div class="banner success">${icons.ok}<p>${t('confirmedBanner', Number(params.get('confirmed')))}</p><button class="close" data-close-banner aria-label="Close">×</button></div>`;
-  else if (signedIn()) banner = `<div class="banner">${icons.info}<p>${t('signedInBanner', esc(state.me.email))}</p></div>`;
+  if (state.banner === 'confirmed') banner = `<div class="banner success">${icons.ok}<p>${t('confirmedBanner', { n: params.get('confirmed') })}</p><button class="close" data-close-banner aria-label="${t('close')}">×</button></div>`;
+  else if (signedIn()) banner = `<div class="banner">${icons.info}<p>${t('signedInBanner', { email: state.me.email })}</p></div>`;
   $('#banner').innerHTML = banner;
 }
 
@@ -254,13 +204,13 @@ function renderTray() {
   document.body.classList.toggle('tray-open', open);
   if (!open) return;
   if (state.trayDone) {
-    $('#tray-content').innerHTML = `<div class="tray-done">${icons.ok}<p>${t('checkInbox', esc(state.trayDone))}<br>${mailboxLink(state.trayDone)}</p>
+    $('#tray-content').innerHTML = `<div class="tray-done">${icons.ok}<p>${t('checkInbox', { email: state.trayDone })}<br>${mailboxLink(state.trayDone)}</p>
       <button type="button" class="btn btn-outline" data-tray-ok style="margin-left:auto">${t('ok')}</button></div>`;
     return;
   }
   const emailVal = $('#tray-email')?.value ?? '';
   $('#tray-content').innerHTML = `<div>
-      <div class="tray-title">${t('traySelected', ids.length)}</div>
+      <div class="tray-title">${t('traySelected', { n: ids.length })}</div>
       <div class="tray-chips">${ids
         .map((id) => `<span class="tray-chip">${esc(edition(id).name)}<button type="button" data-toggle="${id}" aria-label="${t('remove')} ${esc(edition(id).name)}">×</button></span>`)
         .join('')}</div>
@@ -304,7 +254,7 @@ async function setSubscribed(edId, on, { quiet = false } = {}) {
     const me = await api('/api/me/subscriptions', on ? { add: [edId] } : { remove: [edId] });
     state.me.editions = new Set(me.editions);
     render();
-    if (!quiet) toast(t(on ? 'toastOn' : 'toastOff', esc(edition(edId).name)), () => setSubscribed(edId, !on, { quiet: true }));
+    if (!quiet) toast(t(on ? 'toastOn' : 'toastOff', { name: edition(edId).name }), () => setSubscribed(edId, !on, { quiet: true }));
   } catch {
     on ? state.me.editions.delete(edId) : state.me.editions.add(edId);
     render();
@@ -368,7 +318,7 @@ document.addEventListener('submit', async (ev) => {
     try {
       await api('/api/signin', { email, lang: state.ui });
       $('#signin-dialog').close();
-      toast(`${t('signinSent', esc(email))} ${mailboxLink(email)}`);
+      toast(`${t('signinSent', { email })} ${mailboxLink(email)}`);
     } catch {
       toast(t('error'));
     }
@@ -379,6 +329,7 @@ document.addEventListener('submit', async (ev) => {
 
 const [cat, me] = await Promise.all([api('/api/catalogue'), api('/api/me')]);
 state.cat = cat;
+if (!cat.uiLanguages.includes(state.ui)) state.ui = 'en';
 state.me = { email: me.email, editions: new Set(me.editions) };
 if (state.type === 'mine' && !signedIn()) state.type = 'all';
 render();

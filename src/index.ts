@@ -2,7 +2,7 @@ import { Hono, type Context } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 import { cors } from 'hono/cors';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
-import { editionsById, frequencies, isEdition, languageNames, themes, topics } from './catalogue';
+import { catalogue, DEFAULT_LANG, editionsById, isEdition, locales, resolveLang, t } from './config';
 import devmail from './devmail';
 import type { Env } from './env';
 import { actionPage, esc, messagePage, page } from './html';
@@ -17,7 +17,6 @@ const SESSION_COOKIE = 'pc_session';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const normEmail = (e: unknown) => (typeof e === 'string' ? e.trim().toLowerCase() : '');
-const uiLang = (l: unknown): 'en' | 'fr' => (l === 'fr' ? 'fr' : 'en');
 const validEditions = (ids: unknown) => (Array.isArray(ids) ? [...new Set(ids.filter((i) => typeof i === 'string' && isEdition(i)))] : []);
 const meta = (c: C, source?: string | null): RequestMeta => ({
   ip: c.req.header('cf-connecting-ip'),
@@ -50,7 +49,8 @@ app.use('/api/subscribe', (c, next) =>
   cors({ origin: c.env.WIDGET_ORIGINS.split(',').map((o) => o.trim()), allowMethods: ['POST'], allowHeaders: ['Content-Type'] })(c, next),
 );
 
-app.get('/api/catalogue', (c) => c.json({ topics, themes, frequencies, languageNames }));
+// Everything the page and the widget need: the catalogue plus all interface text.
+app.get('/api/catalogue', (c) => c.json({ ...catalogue, i18n: locales, uiLanguages: Object.keys(locales) }));
 
 app.get('/api/me', async (c) => {
   const email = await sessionEmail(c);
@@ -63,7 +63,7 @@ app.post('/api/subscribe', async (c) => {
   const body = await c.req.json<any>().catch(() => ({}));
   const email = normEmail(body.email);
   const editions = validEditions(body.editions);
-  const lang = uiLang(body.lang);
+  const lang = resolveLang(body.lang);
   if (!EMAIL_RE.test(email) || editions.length === 0) return c.json({ error: 'invalid_request' }, 400);
 
   if ((await sessionEmail(c)) === email) {
@@ -95,7 +95,7 @@ app.post('/api/me/subscriptions', async (c) => {
 app.post('/api/signin', async (c) => {
   const body = await c.req.json<any>().catch(() => ({}));
   const email = normEmail(body.email);
-  const lang = uiLang(body.lang);
+  const lang = resolveLang(body.lang);
   if (!EMAIL_RE.test(email)) return c.json({ error: 'invalid_request' }, 400);
   const token = await sign({ t: 'signin', e: email, exp: hours(1) }, c.env.SIGNING_SECRET);
   const mail = signinEmail(lang, `${c.env.PUBLIC_BASE_URL}/signin?token=${token}&lang=${lang}`);
@@ -112,18 +112,22 @@ app.post('/api/signout', (c) => {
 // GET shows a button; POST does the work, so link scanners can't confirm or unsubscribe on someone's behalf.
 
 app.get('/confirm', async (c) => {
-  const lang = uiLang(c.req.query('lang'));
+  const lang = resolveLang(c.req.query('lang'));
   const tok = await verify(c.req.query('token'), 'confirm', c.env.SIGNING_SECRET);
   if (!tok) return c.html(expired(lang), 400);
   return c.html(
-    lang === 'fr'
-      ? actionPage({ lang, title: 'Confirmez votre abonnement', intro: `Pour ${tok.e} :`, items: editionNames(tok.ed), button: 'Confirmer' })
-      : actionPage({ lang, title: 'Confirm your subscription', intro: `For ${tok.e}:`, items: editionNames(tok.ed), button: 'Confirm' }),
+    actionPage({
+      lang,
+      title: t(lang, 'pages.confirmTitle'),
+      intro: t(lang, 'pages.confirmIntro', { email: tok.e }),
+      items: editionNames(tok.ed),
+      button: t(lang, 'pages.confirmButton'),
+    }),
   );
 });
 
 app.post('/confirm', async (c) => {
-  const lang = uiLang(c.req.query('lang'));
+  const lang = resolveLang(c.req.query('lang'));
   const tok = await verify(c.req.query('token'), 'confirm', c.env.SIGNING_SECRET);
   if (!tok) return c.html(expired(lang), 400);
   await logConsent(c.env, tok.e, 'confirmed', tok.ed, meta(c, tok.src));
@@ -131,50 +135,63 @@ app.post('/confirm', async (c) => {
   syncSoon(c);
   // Clicking the emailed link proves they own the address, so sign them in.
   await startSession(c, tok.e);
-  return c.redirect(`/?confirmed=${tok.ed.length}${lang === 'fr' ? '&lang=fr' : ''}`, 303);
+  return c.redirect(`/?confirmed=${tok.ed.length}${langParam(lang)}`, 303);
 });
 
 app.get('/signin', async (c) => {
-  const lang = uiLang(c.req.query('lang'));
+  const lang = resolveLang(c.req.query('lang'));
   const token = c.req.query('token');
   const tok = (await verify(token, 'signin', c.env.SIGNING_SECRET)) ?? (await verify(token, 'manage', c.env.SIGNING_SECRET));
   if (!tok) return c.html(expired(lang), 400);
   return c.html(
-    lang === 'fr'
-      ? actionPage({ lang, title: 'Gérer vos abonnements', intro: `Continuer en tant que ${tok.e}`, button: 'Continuer' })
-      : actionPage({ lang, title: 'Manage your subscriptions', intro: `Continue as ${tok.e}`, button: 'Continue' }),
+    actionPage({
+      lang,
+      title: t(lang, 'pages.signinTitle'),
+      intro: t(lang, 'pages.signinIntro', { email: tok.e }),
+      button: t(lang, 'pages.signinButton'),
+    }),
   );
 });
 
 app.post('/signin', async (c) => {
-  const lang = uiLang(c.req.query('lang'));
+  const lang = resolveLang(c.req.query('lang'));
   const token = c.req.query('token');
   const tok = (await verify(token, 'signin', c.env.SIGNING_SECRET)) ?? (await verify(token, 'manage', c.env.SIGNING_SECRET));
   if (!tok) return c.html(expired(lang), 400);
   await logConsent(c.env, tok.e, 'signed_in', [], meta(c, tok.t));
   await startSession(c, tok.e);
-  return c.redirect(`/?view=mine${lang === 'fr' ? '&lang=fr' : ''}`, 303);
+  return c.redirect(`/?view=mine${langParam(lang)}`, 303);
 });
 
 app.get('/unsubscribe', async (c) => {
+  const lang = resolveLang(c.req.query('lang'));
   const tok = await verify(c.req.query('token'), 'unsub', c.env.SIGNING_SECRET);
-  if (!tok) return c.html(expired('en'), 400);
-  return c.html(actionPage({ title: 'Unsubscribe', intro: `Stop sending these to ${tok.e}:`, items: editionNames(tok.ed), button: 'Unsubscribe' }));
+  if (!tok) return c.html(expired(lang), 400);
+  return c.html(
+    actionPage({
+      lang,
+      title: t(lang, 'pages.unsubTitle'),
+      intro: t(lang, 'pages.unsubIntro', { email: tok.e }),
+      items: editionNames(tok.ed),
+      button: t(lang, 'pages.unsubButton'),
+    }),
+  );
 });
 
 // Also handles RFC 8058 one-click unsubscribe (List-Unsubscribe-Post) from mail clients.
 app.post('/unsubscribe', async (c) => {
+  const lang = resolveLang(c.req.query('lang'));
   const tok = await verify(c.req.query('token'), 'unsub', c.env.SIGNING_SECRET);
-  if (!tok) return c.html(expired('en'), 400);
+  if (!tok) return c.html(expired(lang), 400);
   await setSubscriptions(c.env, tok.e, tok.ed, 'unsubscribed', meta(c, 'unsubscribe-link'));
   syncSoon(c);
-  return c.html(messagePage("You've been unsubscribed", `${editionNames(tok.ed).join(', ')} will no longer be sent to ${tok.e}.`));
+  return c.html(
+    messagePage(t(lang, 'pages.unsubDoneTitle'), t(lang, 'pages.unsubDoneBody', { names: editionNames(tok.ed).join(', '), email: tok.e }), lang),
+  );
 });
 
-const expired = (lang: 'en' | 'fr') =>
-  lang === 'fr'
-    ? messagePage('Lien expiré', 'Ce lien n’est plus valide. Vous pouvez recommencer depuis la page des abonnements.', lang)
-    : messagePage('This link has expired', 'This link is no longer valid. You can start again from the subscriptions page.', lang);
+const expired = (lang: string) => messagePage(t(lang, 'pages.expiredTitle'), t(lang, 'pages.expiredBody'), lang);
+const langParam = (lang: string) => (lang === DEFAULT_LANG ? '' : `&lang=${lang}`);
 
 // ---------------------------------------------------------------- Prototype-only tools
 

@@ -2,7 +2,7 @@
 // The real adapter's endpoints follow Adestra's REST API v1 but have not been tested
 // against a live account yet; check them (and the core table setup) before relying on them.
 
-import { editionsById } from './catalogue';
+import { editionsById } from './config';
 import type { Env } from './env';
 
 export interface SyncResult {

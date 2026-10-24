@@ -8,6 +8,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "strict": true,
+    "resolveJsonModule": true,
     "noEmit": true,
     "skipLibCheck": true
   },

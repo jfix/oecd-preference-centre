@@ -7,7 +7,9 @@
     "db:migrate": "wrangler d1 migrations apply prefs --local",
     "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy",
-    "journeys": "node scripts/capture-journeys.mjs && node scripts/build-journey-boards.mjs"
+    "journeys": "node scripts/capture-journeys.mjs && node scripts/build-journey-boards.mjs",
+    "check:config": "node scripts/check-config.ts",
+    "predeploy": "npm run check:config"
   },
   "dependencies": {
     "hono": "^4.13.13"

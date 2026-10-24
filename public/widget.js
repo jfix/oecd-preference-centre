@@ -7,21 +7,13 @@ const BASE = new URL('.', import.meta.url).origin;
 let cataloguePromise;
 const catalogue = () => (cataloguePromise ??= fetch(`${BASE}/api/catalogue`).then((r) => r.json()));
 
-const copy = {
-  en: {
-    newsletter: 'Newsletter', blog: 'Blog alert', get: (n) => `Get the ${n} newsletter`, alerts: (n) => `Get ${n} alerts`,
-    email: 'Your email address', subscribe: 'Subscribe',
-    fine: 'We will email you to confirm. Unsubscribe at any time.',
-    done: (e) => `Almost done! Check your inbox at <strong>${e}</strong> and click the link to confirm.`,
-    all: 'Explore all OECD newsletters', error: 'Something went wrong. Please try again.',
-  },
-  fr: {
-    newsletter: "Lettre d'information", blog: 'Alerte blog', get: (n) => `Recevez la lettre ${n}`, alerts: (n) => `Recevez les alertes ${n}`,
-    email: 'Votre adresse e-mail', subscribe: "S'abonner",
-    fine: 'Nous vous enverrons un e-mail de confirmation. Désabonnement possible à tout moment.',
-    done: (e) => `Presque terminé ! Consultez votre boîte mail (<strong>${e}</strong>) et cliquez sur le lien pour confirmer.`,
-    all: "Toutes les lettres d'information de l'OCDE", error: 'Une erreur est survenue. Veuillez réessayer.',
-  },
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+/** Text from i18n/<lang>.json (served with the catalogue), English fallback, {placeholders} escaped. */
+const translator = (cat, lang) => (path, vars = {}) => {
+  const find = (l) => path.split('.').reduce((node, key) => node?.[key], cat.i18n[l]);
+  const msg = find(lang) ?? find('en') ?? path;
+  return msg.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? esc(vars[k]) : m));
 };
 
 const css = `
@@ -43,28 +35,27 @@ a:hover { text-decoration: underline; }
 class NewsletterSignup extends HTMLElement {
   async connectedCallback() {
     const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
-    const lang = this.getAttribute('lang') === 'fr' ? 'fr' : 'en';
-    const t = copy[lang];
     const cat = await catalogue();
+    const lang = cat.uiLanguages.includes(this.getAttribute('lang')) ? this.getAttribute('lang') : 'en';
+    const t = translator(cat, lang);
     const topic = cat.topics.find((tp) => tp.id === this.getAttribute('topic'));
     if (!topic) return;
     const ed = topic.editions.find((e) => e.lang === lang) ?? topic.editions[0];
-    const freq = cat.frequencies[topic.frequency][lang];
-    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+    const freq = t(`frequencies.${ed.frequency ?? topic.frequency}`);
 
     root.innerHTML = `<style>${css}</style>
       <div class="box" part="box">
-        <div class="meta">${t[topic.type]} · ${freq}</div>
-        <h2>${esc(topic.type === 'blog' ? t.alerts(ed.name) : t.get(ed.name))}</h2>
+        <div class="meta">${t(`ui.${topic.type}`)} · ${freq}</div>
+        <h2>${t(topic.type === 'blog' ? 'widget.getAlerts' : 'widget.getNewsletter', { name: ed.name })}</h2>
         <p>${esc(ed.description)}</p>
         <div class="slot">
           <form>
-            <input type="email" required autocomplete="email" placeholder="${t.email}" aria-label="${t.email}">
-            <button type="submit">${t.subscribe}</button>
+            <input type="email" required autocomplete="email" placeholder="${t('ui.emailPlaceholder')}" aria-label="${t('ui.email')}">
+            <button type="submit">${t('ui.subscribe')}</button>
           </form>
-          <p class="fine">${t.fine}</p>
+          <p class="fine">${t('widget.fine')}</p>
         </div>
-        <a href="${BASE}/${lang === 'fr' ? '?lang=fr' : ''}">${t.all} →</a>
+        <a href="${BASE}/${lang === 'en' ? '' : `?lang=${lang}`}">${t('widget.all')} →</a>
       </div>`;
 
     root.querySelector('form').addEventListener('submit', async (ev) => {
@@ -79,10 +70,10 @@ class NewsletterSignup extends HTMLElement {
           body: JSON.stringify({ email, editions: [ed.id], lang, source: `widget:${location.hostname}${location.pathname}` }),
         });
         if (!res.ok) throw new Error();
-        root.querySelector('.slot').innerHTML = `<p>${t.done(esc(email))}</p>`;
+        root.querySelector('.slot').innerHTML = `<p>${t('widget.done', { email })}</p>`;
       } catch {
         btn.disabled = false;
-        root.querySelector('.fine').textContent = t.error;
+        root.querySelector('.fine').innerHTML = t('ui.error');
       }
     });
   }

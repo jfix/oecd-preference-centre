@@ -145,6 +145,7 @@ Not implemented in the prototype.
 - **AEM:** allow the signup box's script on oecd.org pages (Content Security Policy).
 - **Data protection review** of the consent wording, the consent log, and retention.
 - **Bot protection** on the forms (e.g. Cloudflare Turnstile).
+- **Editing without a developer** (optional). The newsletter list and text are JSON files in the repository, so changes need a commit and a deploy. If editors should change them directly, they'd need to live in storage with a small admin page.
 
 ---
 
@@ -191,9 +192,37 @@ This resets the local database, walks through each journey in headless Chrome (`
 
 Changes go to an `outbox` table and are pushed to Adestra straight after the request, with a cron trigger every 5 minutes retrying failures. Every request, confirmation, subscribe and unsubscribe is recorded in `consent_events`.
 
-### Catalogue
+### Configuring newsletters, alerts and text
 
-`src/catalogue.ts` lists topics (newsletters or blogs), each with one or more language **editions**. An edition is what people subscribe to and maps to one Adestra list. Newsletter names and descriptions come from oecd.org; the blogs and all Adestra list IDs are placeholders.
+Two kinds of JSON file control what the site shows. Edit them, run `npm run check:config`, commit, and deploy.
+
+**`config/catalogue.json`: the newsletters and blog alerts**
+
+```json
+{
+  "id": "development",
+  "type": "newsletter",
+  "theme": "global",
+  "frequency": "monthly",
+  "editions": [
+    { "lang": "en", "name": "Development", "description": "…", "adestraListId": 1024 },
+    { "lang": "fr", "name": "Développement", "description": "…", "adestraListId": 1025 }
+  ]
+}
+```
+
+- `type` is `newsletter` or `blog`. `theme` and `frequency` must be listed in the `themes` and `frequencies` arrays at the top of the file. The order of `themes` is the order of sections on the page; the `featured` theme is shown as the large panel at the top.
+- Each **edition** is one language of the topic, and is what people subscribe to. It maps to one Adestra list. An edition can override the topic's `frequency`.
+- **Don't rename a topic's `id` or remove an edition's `lang` once people have subscribed.** Subscriptions are stored against `<id>-<lang>` (e.g. `development-fr`).
+- The Adestra list IDs in the file are placeholders.
+
+**`i18n/<lang>.json`: all interface text, one file per language**
+
+Covers the page, the signup widget, the confirmation and sign-in emails, and the confirm/sign-in/unsubscribe pages, plus the names of themes and frequencies. `{email}`-style placeholders are filled in by the code; `one`/`other` pairs are singular and plural. Missing text falls back to English, and `npm run check:config` lists anything not yet translated.
+
+To add an interface language (e.g. Spanish): copy `i18n/en.json` to `i18n/es.json`, translate it, and add `es` to `locales` in `src/config.ts`. It then appears in the language switcher automatically. Newsletter names and descriptions are not in these files: each edition in the catalogue carries its own.
+
+**Safety net:** the files are checked when the app starts. Typos such as an unknown theme, a duplicate Adestra list ID or a missing description stop `npm run dev`, `npm run check:config` and `npm run deploy` with a message naming the exact entry, so a broken file never reaches the live site.
 
 ### Embedding the widget
 
@@ -206,6 +235,8 @@ The embedding site's origin must be listed in `WIDGET_ORIGINS`, and its Content 
 
 ### Code layout
 
+- `config/catalogue.json`, `i18n/*.json`: newsletters and all interface text (see above)
+- `src/config.ts`: loads and validates those files; translation helper
 - `src/index.ts`: routes (API, email-link pages, dev tools)
 - `src/store.ts`: database access and the Adestra outbox
 - `src/adestra.ts`: fake adapter (default) and REST adapter (used when `ADESTRA_API_KEY` is set; **untested** against a live account)
