@@ -18,6 +18,7 @@ const strings = {
     emailPlaceholder: 'Your email address', email: 'Email address',
     privacy: 'We will email you to confirm. You can unsubscribe at any time. <a href="https://www.oecd.org/en/about/privacy.html" target="_blank">Privacy policy</a>',
     checkInbox: (e) => `Almost done! We've sent an email to <strong>${e}</strong>. Click the link inside to confirm.`,
+    openMailbox: 'Open the prototype mailbox',
     ok: 'OK', remove: 'Remove', cancel: 'Cancel', sendLink: 'Send me a link',
     signinTitle: 'Manage your subscriptions',
     signinIntro: "Enter your email address and we'll send you a link to see and change your subscriptions. No password needed.",
@@ -47,6 +48,7 @@ const strings = {
     emailPlaceholder: 'Votre adresse e-mail', email: 'Adresse e-mail',
     privacy: 'Nous vous enverrons un e-mail de confirmation. Désabonnement possible à tout moment. <a href="https://www.oecd.org/fr/about/privacy.html" target="_blank">Politique de confidentialité</a>',
     checkInbox: (e) => `Presque terminé ! Nous avons envoyé un e-mail à <strong>${e}</strong>. Cliquez sur le lien pour confirmer.`,
+    openMailbox: 'Ouvrir la boîte mail du prototype',
     ok: 'OK', remove: 'Retirer', cancel: 'Annuler', sendLink: 'Envoyer le lien',
     signinTitle: 'Gérer vos abonnements',
     signinIntro: 'Saisissez votre adresse e-mail : nous vous enverrons un lien pour consulter et modifier vos abonnements. Aucun mot de passe nécessaire.',
@@ -93,6 +95,9 @@ const t = (k, ...a) => {
   return typeof v === 'function' ? v(...a) : v;
 };
 const signedIn = () => !!state.me.email;
+// Prototype only: emails aren't really sent, they land in the dev mailbox.
+const mailboxLink = (email) =>
+  `<a class="mailbox-link" href="/dev/mailbox?to=${encodeURIComponent(email)}" target="_blank">${t('openMailbox')} ↗</a>`;
 const isOn = (edId) => (signedIn() ? state.me.editions.has(edId) : state.selected.has(edId));
 const edition = (id) => state.cat.topics.flatMap((tp) => tp.editions).find((e) => e.id === id);
 
@@ -249,7 +254,7 @@ function renderTray() {
   document.body.classList.toggle('tray-open', open);
   if (!open) return;
   if (state.trayDone) {
-    $('#tray-content').innerHTML = `<div class="tray-done">${icons.ok}<p>${t('checkInbox', esc(state.trayDone))}</p>
+    $('#tray-content').innerHTML = `<div class="tray-done">${icons.ok}<p>${t('checkInbox', esc(state.trayDone))}<br>${mailboxLink(state.trayDone)}</p>
       <button type="button" class="btn btn-outline" data-tray-ok style="margin-left:auto">${t('ok')}</button></div>`;
     return;
   }
@@ -363,7 +368,7 @@ document.addEventListener('submit', async (ev) => {
     try {
       await api('/api/signin', { email, lang: state.ui });
       $('#signin-dialog').close();
-      toast(t('signinSent', esc(email)));
+      toast(`${t('signinSent', esc(email))} ${mailboxLink(email)}`);
     } catch {
       toast(t('error'));
     }

@@ -132,7 +132,7 @@ npm run dev
 
 Open http://localhost:8787. The yellow "Prototype" bar links to:
 
-- **Mailbox** (`/dev/mailbox`): the confirmation and sign-in emails the prototype "sent". Click the links in them to continue the flow.
+- **Mailbox** (`/dev/mailbox`): a webmail-style inbox holding the confirmation and sign-in emails the prototype "sent" (nothing is really emailed). Filter it by your address and click the links in the emails to continue the flow. The "check your inbox" messages link straight to it.
 - **Adestra sync** (`/dev/adestra`): the outbox of changes pushed to Adestra, the consent log, and a sample newsletter footer with manage/unsubscribe links.
 - **Widget demo** (`/demo/tax.html`): the signup widget on a mock oecd.org topic page.
 

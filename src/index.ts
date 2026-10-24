@@ -3,6 +3,7 @@ import { basicAuth } from 'hono/basic-auth';
 import { cors } from 'hono/cors';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { editionsById, frequencies, isEdition, languageNames, themes, topics } from './catalogue';
+import devmail from './devmail';
 import type { Env } from './env';
 import { actionPage, esc, messagePage, page } from './html';
 import { confirmEmail, mailer, signinEmail } from './mail';
@@ -184,18 +185,7 @@ app.use('/dev/*', async (c, next) => {
   return basicAuth({ username: 'oecd', password: c.env.DEV_PASSWORD })(c, next);
 });
 
-app.get('/dev/mailbox', async (c) => {
-  const { results } = await c.env.DB.prepare(`SELECT * FROM dev_mail ORDER BY id DESC LIMIT 30`).all<any>();
-  const items = results
-    .map(
-      (m) => `<details class="dev-item" ${m === results[0] ? 'open' : ''}>
-        <summary><strong>${esc(m.subject)}</strong> <span>to ${esc(m.to_email)} · ${esc(m.created_at)} UTC</span></summary>
-        <iframe sandbox="allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" srcdoc="${esc(m.html.replace(/<a /g, '<a target="_top" '))}"></iframe>
-      </details>`,
-    )
-    .join('');
-  return c.html(page('Dev mailbox', `<h1>Dev mailbox</h1><p class="lede">Emails the prototype would have sent. Newest first.</p>${items || '<p>No emails yet.</p>'}`));
-});
+app.route('/dev/mailbox', devmail);
 
 app.get('/dev/adestra', async (c) => {
   const [outbox, consent] = await Promise.all([

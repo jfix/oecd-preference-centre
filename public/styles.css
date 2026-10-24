@@ -156,6 +156,7 @@ main.catalogue { padding-bottom: 160px; }
 .tray input[type='email'] { flex: 1; min-width: 220px; font: 400 15px/1 var(--font-body); padding: 12px 14px; border-radius: var(--radius-control); border: 1px solid transparent; }
 .tray .fine { font-size: 12px; margin: 6px 0 0; color: rgba(255, 255, 255, 0.65); }
 .tray .fine a { color: #82b6ff; }
+.mailbox-link { color: #82b6ff; font-weight: 700; font-size: 14px; }
 .tray-done { display: flex; gap: 14px; align-items: center; color: var(--white); }
 
 /* ---------- Toast */

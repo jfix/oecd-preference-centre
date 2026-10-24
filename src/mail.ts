@@ -6,6 +6,10 @@ import { editionsById } from './catalogue';
 import type { Env } from './env';
 import { esc } from './html';
 
+// Placeholder sender; the real address depends on the sending domain chosen for production.
+export const FROM_NAME = 'OECD';
+export const FROM_ADDRESS = 'newsletters@oecd.org';
+
 export interface Mailer {
   send(to: string, subject: string, html: string): Promise<void>;
 }

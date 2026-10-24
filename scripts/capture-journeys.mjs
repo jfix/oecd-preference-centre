@@ -30,7 +30,7 @@ async function newPage() {
   await page.evaluateOnNewDocument(() =>
     document.addEventListener('DOMContentLoaded', () => {
       const s = document.createElement('style');
-      s.textContent = '.proto-tools { display: none !important; }';
+      s.textContent = '.proto-tools, .mailbox-link { display: none !important; }';
       document.head.append(s);
     }),
   );
@@ -57,14 +57,23 @@ async function gotoCatalogue(page, path = '/') {
   await page.evaluate(() => document.fonts.ready);
 }
 
-/** Opens the most recent email in the dev mailbox; returns its HTML and its first link. */
-async function latestMail(page) {
-  await page.goto(`${BASE}/dev/mailbox`, { waitUntil: 'networkidle0' });
+/** Opens the most recent email in the prototype mailbox; returns its first link. */
+async function latestMail(page, to) {
+  await page.goto(`${BASE}/dev/mailbox?to=${encodeURIComponent(to)}`, { waitUntil: 'networkidle0' });
+  await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('.row')]);
   return page.evaluate(() => {
     const html = document.querySelector('iframe').getAttribute('srcdoc');
-    const href = new DOMParser().parseFromString(html, 'text/html').querySelector('a').getAttribute('href');
-    return { html, href };
+    return { href: new DOMParser().parseFromString(html, 'text/html').querySelector('a').getAttribute('href') };
   });
+}
+
+/** Screenshot of the open email in the mailbox, as the tester sees it. */
+async function shotMail(page, name) {
+  await page.setViewport({ ...VIEWPORT, width: 1180, height: 760 });
+  await page.reload({ waitUntil: 'networkidle0' });
+  await page.evaluate(() => document.fonts.ready);
+  await shot(page, name);
+  await page.setViewport(VIEWPORT);
 }
 
 /** Renders an email (or any HTML) on its own, as it would look in a mail client. */
@@ -95,8 +104,8 @@ await a.keyboard.press('Enter');
 await a.waitForSelector('.tray-done');
 await shot(a, 'a3-check-inbox');
 
-let mail = await latestMail(a);
-await shotHtml(a, 'a4-confirm-email', mail.html);
+let mail = await latestMail(a, alex);
+await shotMail(a, 'a4-confirm-email');
 
 await a.goto(mail.href, { waitUntil: 'networkidle0' });
 await shotPanel(a, 'a5-confirm-page');
@@ -117,8 +126,8 @@ await shot(b, 'b1-manage');
 
 await b.click('#signin-form button[type=submit]');
 await b.waitForSelector('.toast.show');
-mail = await latestMail(b);
-await shotHtml(b, 'b2-signin-email', mail.html);
+mail = await latestMail(b, alex);
+await shotMail(b, 'b2-signin-email');
 
 await b.goto(mail.href, { waitUntil: 'networkidle0' });
 await shotPanel(b, 'b3-continue');
@@ -146,8 +155,8 @@ await c.waitForFunction(() => document.querySelector('oecd-newsletter-signup').s
 const widget = await c.$('oecd-newsletter-signup');
 await shot(c, 'c2-widget-done', { clip: await widget.boundingBox().then((bb) => ({ x: bb.x - 24, y: bb.y - 24, width: bb.width + 48, height: bb.height + 48 })) });
 
-mail = await latestMail(c);
-await shotHtml(c, 'c3-confirm-email', mail.html);
+mail = await latestMail(c, 'sam.okafor@example.org');
+await shotMail(c, 'c3-confirm-email');
 
 // ---------------------------------------------------------------- Journey D: unsubscribe from a newsletter footer
 console.log('Journey D: unsubscribe');
