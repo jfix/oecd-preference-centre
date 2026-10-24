@@ -4,3 +4,6 @@ SIGNING_SECRET=change-me-to-a-long-random-string
 ADESTRA_API_KEY=
 ADESTRA_BASE_URL=https://app.adestra.com/api/rest/1
 ADESTRA_CORE_TABLE_ID=
+
+# Local overrides
+PUBLIC_BASE_URL=http://localhost:8787

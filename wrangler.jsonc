@@ -13,17 +13,16 @@
     {
       "binding": "DB",
       "database_name": "prefs",
-      // Replace with the id from `wrangler d1 create prefs` before deploying.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "02c6ce17-d12e-409a-b7d7-12be334164d4",
       "migrations_dir": "migrations"
     }
   ],
   "vars": {
-    "PUBLIC_BASE_URL": "http://localhost:8787",
+    "PUBLIC_BASE_URL": "https://oecd-preference-centre.jakob-fix.workers.dev",
     // Shows the dev mailbox and Adestra sync log. Set to "false" in production.
     "DEV_TOOLS": "true",
     // Comma-separated origins allowed to embed the signup widget.
-    "WIDGET_ORIGINS": "http://localhost:8787,https://www.oecd.org"
+    "WIDGET_ORIGINS": "http://localhost:8787,https://oecd-preference-centre.jakob-fix.workers.dev,https://www.oecd.org"
   },
   // Retries anything the outbox couldn't push to Adestra straight away.
   "triggers": { "crons": ["*/5 * * * *"] },

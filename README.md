@@ -19,6 +19,12 @@ Open http://localhost:8787. The yellow "Prototype" bar links to:
 - **Adestra sync** (`/dev/adestra`): the outbox of changes pushed to Adestra, the consent log, and a sample newsletter footer with manage/unsubscribe links.
 - **Widget demo** (`/demo/tax.html`): the signup widget on a mock oecd.org topic page.
 
+## Deployed prototype
+
+https://oecd-preference-centre.jakob-fix.workers.dev (Cloudflare Workers + D1)
+
+The `/dev/*` pages (mailbox, Adestra sync) need a password, user `oecd`. Set it with `wrangler secret put DEV_PASSWORD`. Deploy changes with `npm run deploy`; apply new migrations with `wrangler d1 migrations apply prefs --remote`.
+
 ## How it works
 
 | Situation | What happens |

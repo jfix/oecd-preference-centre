@@ -1,4 +1,5 @@
 import { Hono, type Context } from 'hono';
+import { basicAuth } from 'hono/basic-auth';
 import { cors } from 'hono/cors';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { editionsById, frequencies, isEdition, languageNames, themes, topics } from './catalogue';
@@ -176,7 +177,12 @@ const expired = (lang: 'en' | 'fr') =>
 
 // ---------------------------------------------------------------- Prototype-only tools
 
-app.use('/dev/*', async (c, next) => (c.env.DEV_TOOLS === 'true' ? next() : c.notFound()));
+// The mailbox shows everyone's confirmation links, so outside local dev it sits behind a password.
+app.use('/dev/*', async (c, next) => {
+  if (c.env.DEV_TOOLS !== 'true') return c.notFound();
+  if (!c.env.DEV_PASSWORD) return c.env.PUBLIC_BASE_URL.startsWith('http://localhost') ? next() : c.notFound();
+  return basicAuth({ username: 'oecd', password: c.env.DEV_PASSWORD })(c, next);
+});
 
 app.get('/dev/mailbox', async (c) => {
   const { results } = await c.env.DB.prepare(`SELECT * FROM dev_mail ORDER BY id DESC LIMIT 30`).all<any>();
